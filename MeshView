@@ -1,0 +1,89 @@
+import SwiftUI
+
+struct MyMeshView: View {
+    // 2D vector point of floating point number
+    // part of Single Instruction, multiple Data, for parallel processing
+    // represent a 2d with xy coordinate
+    @State private var points: [SIMD2<Float>] = [
+        [0.323,0.199], [0.5,0], [1,0],
+        [0,0.5], [0.909,0.196], [1,0.5],
+        [0,1], [0.5,1], [0.826,0.872],
+    ]
+    @State private var colors: [Color] = [
+        .indigo, .indigo, .indigo,
+        .brown, .green, .white,
+        .purple, .black, .mint,
+        
+    ]
+    
+    @State private var background: Color = .green
+    
+    // create a custom view with gradient base om point and colorr
+    // mesh is computed property since it calculate and return a view  each time it is accessed
+    // it is computed because it calculate its value rather than storing it
+    // some view confirm the SwiftUI view protocol
+    // width and height set up 3x3 grid
+    // other use the state variables degined above
+    var mesh: some View {
+        MeshGradient(
+            width: 3,
+            height: 3,
+            points: points,
+            colors: colors,
+            background: background
+        )
+        
+    }
+    var animation: Animation {
+        Animation
+            .linear(duration: 5)
+        // bascially the animation will repeat forever
+            .repeatForever(autoreverses: false)
+    }
+    let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
+    // automatically connect to the timer and disconnect when view disappear
+    
+    var body: some View {
+        mesh
+            .animation(animation, value: points)
+            .ignoresSafeArea()
+            .onReceive(timer) { _ in
+                randomizePointsAndColors()
+            }
+    }
+    
+    func randomizePointsAndColors() {
+
+            let someColors: [Color] = [
+                .indigo,
+                .brown, .green, .white,
+                .purple, .mint,
+            ]
+            
+            points[4].x = Float.random(in: 0...1)
+            points[4].y = Float.random(in: 0...1)
+            colors[4] = someColors
+                .randomElement() ?? .indigo
+            
+            points[0].x = Float.random(in: 0.2...0.4)
+            points[0].y = Float.random(in: 0.1...0.3)
+            colors[0] = someColors
+                .randomElement() ?? .indigo
+            
+            points[8].x = Float.random(in: 0.6...0.8)
+            points[8].y = Float.random(in: 0.7...0.8)
+            colors[8] = someColors
+                .randomElement() ?? .indigo
+            
+            background = someColors
+                .randomElement() ?? .indigo
+        
+
+    }
+
+}
+
+
+#Preview {
+    MyMeshView()
+}
